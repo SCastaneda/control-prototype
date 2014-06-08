@@ -1,0 +1,117 @@
+<html>
+  <head>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+    <style type="text/css">
+      .player {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: 15px;
+        height: 15px;
+      }
+
+      .red {
+        background-color: red
+      }
+
+      .blue {
+        background-color: blue;
+      }
+
+      .green {
+        background-color: green;
+      }
+
+      .purple {
+        background-color: purple;
+      }
+
+      .yellow {
+        background-color: yellow;
+      }
+
+      .pink {
+        background-color: pink;
+      }
+    </style>
+  </head>
+  <body>
+    <div id="screen" style="background-color: gray; width:100%; height: 100%;">
+    </div>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script type="text/javascript">
+    var players = [];
+    var last_player_num = 0;
+    var colors = ["red","blue","green","purple","yellow","pink"];
+    var last_color = 0;
+
+    function move(player, left, up) {
+      var width = $('#screen').css('width');
+      var height = $('#screen').css('height');
+
+      // console.log("width:" + width);
+      // console.log("height:" + height);
+
+      var x = $('#' + player).css('left');
+      var y = $('#' + player).css('top');
+      // console.log("x:" + x + " y:"+y);
+
+      $("#"+player).animate({"left": "+="+left, "top": "-="+up }, 1, function() {
+        
+      });
+
+    }
+
+    function createPlayer(cb) {
+      var color = nextColor();
+      var top   = Math.floor(Math.random() * 90);
+      var left  = Math.floor(Math.random() * 90);
+      $('#screen').append('<div id="'+(++last_player_num)+'" class="player '+color+'" style="top:'+top+'%;left:'+left+'%;"></div>');
+      players.push(last_player_num);
+      cb(last_player_num);
+    }
+
+    function deletePlayer(num) {
+      $('#'+num).remove();
+      players.splice(players.indexOf(num), 1);
+    }
+
+    function nextColor() {
+      return colors[(last_color++) % colors.length];
+    }
+
+
+    // SOCKET EVENTS
+    var socket = io.connect("");
+
+    $(document).ready(function() {
+        socket.emit('join_game', {room: '<%= room %>', type: "screen"});
+    });
+
+    socket.on("player_joined_game", function(data) {
+      console.log("Socket id:" + data.socket_id);
+      createPlayer(function(player_num) {
+        socket.emit("assign_number", { number: player_num, socket_id: data.socket_id });
+      });
+    });
+
+    socket.on("move", function(data) {
+      // console.log("Recieved move: dx:"+data.dx+" dy:"+data.dy);
+      move(data.number, data.dx, data.dy);
+    });
+
+    socket.on("disconnect", function(data) {
+      deletePlayer(data.number);
+    });
+
+    socket.on('player_disconnected', function(data) {
+        console.log(data.type + " disconnected...");
+        if(data.type == "controller") {
+          deletePlayer(data.number);
+        }
+    });
+
+    </script>
+  </body>
+</html>

@@ -1,0 +1,96 @@
+<html>
+    <head>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, user-scalable=no, minimum-scale=1.0, maximum-scale=1.0">
+        <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+        <style>
+        body {
+            overflow    : hidden;
+            padding     : 0;
+            margin      : 0;
+            background-color: #BBB;
+        }
+        #info {
+            position    : absolute;
+            top     : 0px;
+            width       : 100%;
+            padding     : 5px;
+            text-align  : center;
+        }
+        #info a {
+            color       : #66F;
+            text-decoration : none;
+        }
+        #info a:hover {
+            text-decoration : underline;
+        }
+        #container {
+            width       : 100%;
+            height      : 100%;
+            overflow    : hidden;
+            padding     : 0;
+            margin      : 0;
+            -webkit-user-select : none;
+            -moz-user-select    : none;
+        }
+        </style>
+    </head>
+    <body>
+        <div id="container"></div>
+        <div id="info">
+            Touch the screen and move
+            -
+            works with mouse too as debug
+            <br/>
+            <span id="result"></span>
+        </div>
+        <script src="/socket.io/socket.io.js"></script>
+        <script src="/javascripts/virtualjoystick.js"></script>
+        <script>
+            console.log("touchscreen is", VirtualJoystick.touchScreenAvailable() ? "available" : "not available");
+
+            var joystick    = new VirtualJoystick({
+                container   : document.getElementById('container'),
+                mouseSupport    : true,
+                limitStickTravel: true
+            });
+            joystick.addEventListener('touchStart', function(){
+                console.log('down')
+            });
+            joystick.addEventListener('touchEnd', function(){
+                console.log('up')
+            });
+
+            // SOCKET EVENTS
+            var socket = io.connect("");
+            $(document).ready(function() {
+                socket.emit('join_game', {room: '<%= room %>', type: "control"});
+            });
+
+            socket.on('player_disconnected', function(data) {
+                console.log(data.type + " disconnected...");
+            });
+
+            setInterval(function(){
+                // var outputEl    = document.getElementById('result');
+                // outputEl.innerHTML  = '<b>Result:</b> '
+                //     + ' dx:'+joystick.deltaX()
+                //     + ' dy:'+joystick.deltaY()
+                //     + (joystick.right() ? ' right'  : '')
+                //     + (joystick.up()    ? ' up'     : '')
+                //     + (joystick.left()  ? ' left'   : '')
+                //     + (joystick.down()  ? ' down'   : '');
+
+                var dx = joystick.deltaX()/10;
+                var dy = -joystick.deltaY()/10;
+
+                if(dx != 0 || dy != 0) {
+                    // console.log("sending move: dx:"+dx+" dy:" + dy);
+                    socket.emit('move', { dx: dx*2, dy: dy*2 });
+                }
+
+
+            }, 1/30 * 1000);
+        </script>
+    </body>
+</html>
