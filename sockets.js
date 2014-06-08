@@ -29,13 +29,13 @@ function disconnect(socket) {
         room.players.forEach(function(player, i) {
             if(player.socket == socket) {
                 var player_num = player.number;
-                room.players.splice(i, 0);
+                room.players.splice(i, 1);
                 broadcastDisconnectToRoom(room, "controller", player_num);
             }
         });
         room.screens.forEach(function(ascreen, i) {
             if(ascreen == socket) {
-                room.screens.splice(i, 0);
+                room.screens.splice(i, 1);
                 broadcastDisconnectToRoom(room, "screen", -1);
             }
         });
