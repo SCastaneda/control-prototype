@@ -6,44 +6,44 @@
         position: absolute;
         top: 50%;
         left: 50%;
-        width: 15px;
-        height: 15px;
+        width: 20px;
+        height: 20px;
       }
 
       .red {
-        background-color: red
+        background-color: #e74c3c;
       }
 
       .blue {
-        background-color: blue;
+        background-color: #3498db;
       }
 
       .green {
-        background-color: green;
+        background-color: #3fd47e;
       }
 
       .purple {
-        background-color: purple;
+        background-color: #9b59b6;
       }
 
       .yellow {
-        background-color: yellow;
+        background-color: #f1c40f;
       }
 
-      .pink {
-        background-color: pink;
+      .dark {
+        background-color: #2c3e50;
       }
     </style>
   </head>
   <body>
-    <div id="screen" style="background-color: gray; width:100%; height: 100%;">
+    <div id="screen" style="background-color: #bdc3c7; width:100%; height: 100%;">
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
     <script type="text/javascript">
     var players = [];
     var last_player_num = 0;
-    var colors = ["red","blue","green","purple","yellow","pink"];
+    var colors = ["red","blue","green","purple","yellow","dark"];
     var last_color = 0;
 
     function move(player, left, up) {
