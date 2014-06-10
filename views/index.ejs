@@ -2,10 +2,56 @@
 <html>
   <head>
     <title><%= title %></title>
+    <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
     <link rel='stylesheet' href='/stylesheets/style.css' />
   </head>
   <body>
-    <h1><a href="/show/1">Screen</a></h1><br>
-    <h1><a href="/control/1">Controllers</a></h1>
+    <div id="screen"></div>
+    <script type="text/javascript">
+        var isMobile = {
+            Android: function() {
+                return navigator.userAgent.match(/Android/i);
+            },
+            BlackBerry: function() {
+                return navigator.userAgent.match(/BlackBerry/i);
+            },
+            iOS: function() {
+                return navigator.userAgent.match(/iPhone|iPad|iPod/i);
+            },
+            Opera: function() {
+                return navigator.userAgent.match(/Opera Mini/i);
+            },
+            Windows: function() {
+                return navigator.userAgent.match(/IEMobile/i);
+            },
+            any: function() {
+                return (isMobile.Android() || isMobile.BlackBerry() || isMobile.iOS() || isMobile.Opera() || isMobile.Windows());
+            }
+        };
+
+        function displayMobileScreen() {
+            var page = "<div style='width:100%'>" +
+                            "<center>" + 
+                                "<h3>Enter Code</h3>" +
+                                "<input style='height: 400px; width: 100%; font-size: 2em;' id='room_number' type='text' /><br>" +
+                                "<button style='height: 500px; width:80%; font-size: 2em;' onclick='var room_number = $(\"#room_number\").val(); window.location.replace(\"/control/\" + room_number)'>Play</button>" +
+                            "</center>"
+                        "</div>";
+            $('#screen').html(page);
+        }
+
+        function displayViewScreen() {
+            var random = Math.floor(Math.random() * 10000);
+            window.location.replace('/show/' + random);
+        }
+        $(document).ready(function() {
+            if( isMobile.any() ) {
+                displayMobileScreen();
+            } else {
+                displayViewScreen();
+            }
+        });
+
+    </script>
   </body>
 </html>
