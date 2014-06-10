@@ -55,16 +55,45 @@
       var width = $('#screen').css('width');
       var height = $('#screen').css('height');
 
+      //Turn width and height into numbers
+      width = 1 * (width.replace("px", ""));
+      height = 1 * (height.replace("px", ""));      
+
       // console.log("width:" + width);
       // console.log("height:" + height);
 
       var x = $('#' + player).css('left');
       var y = $('#' + player).css('top');
-      // console.log("x:" + x + " y:"+y);
 
-      $("#"+player).animate({"left": "+="+left, "top": "-="+up }, 1, function() {
+      //turn x, y into number
+      y = 1 * (y.replace("px", ""));
+      x = 1 * (x.replace("px", ""));
+
+      // console.log(x);
+      // console.log(up);
+
+      //Protect from going off the top and left
+      up   = ((y-up) <= 10) ? 0 : up;
+      left = ((x+left) <= 10) ? 0 : left;
+
+
+      //Protect from going off the bottom and right
+      if( (y+up) >= (height-50) && (up < 0) ){
+        up = 0;
+      }
+
+      if((x-left) >= (width-50) && (left > 0)){
+        left = 0;
+      }
+    
+
+      //Replaced animate with css, got some perfomance improvement.
+      $('#' + player).css('left', "+="+left);
+      $('#' + player).css('top', "-="+up);
+      // $("#"+player).animate({"left": "+="+left, "top": "-="+up }, 1, function() {
         
-      });
+      // });
+      
 
     }
 
