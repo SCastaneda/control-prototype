@@ -47,6 +47,9 @@
         <script>
             console.log("touchscreen is", VirtualJoystick.touchScreenAvailable() ? "available" : "not available");
 
+            var prev_x = 0;
+            var prev_y = 0;
+
             var joystick    = new VirtualJoystick({
                 container   : document.getElementById('container'),
                 mouseSupport    : true,
@@ -82,9 +85,13 @@
                 var dx = joystick.deltaX()/10;
                 var dy = -joystick.deltaY()/10;
 
-                if(dx != 0 || dy != 0) {
+
+                if(prev_x + prev_y + dx + dy != 0){
+                // if(dx != 0 || dy != 0) {
                     // console.log("sending move: dx:"+dx+" dy:" + dy);
                     socket.emit('move', { dx: dx*2, dy: dy*2 });
+                    prev_x = dx;
+                    prev_y = dy;
                 }
 
 

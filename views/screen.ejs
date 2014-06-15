@@ -1,6 +1,7 @@
 <html>
   <head>
     <script type="text/javascript" src="http://code.jquery.com/jquery-1.11.1.min.js"></script>
+
     <style type="text/css">
       .player {
         position: absolute;
@@ -41,75 +42,76 @@
         CODE <%= room %>
       </center>
     </div>
-    <div id="screen" style="background-color: #bdc3c7; width:100%; height: 100%;">
+    <!-- <div id="screen" style="background-color: #bdc3c7; width:100%; height: 100%;"> -->
+    <canvas id="screen" width="700" height="500" style="background-color: #bdc3c7; "></canvas>
     </div>
 
     <script src="/socket.io/socket.io.js"></script>
+    <script src="../javascripts/tinyGameEngine.js"></script>
     <script type="text/javascript">
     var players = [];
     var last_player_num = 0;
     var colors = ["red","blue","green","purple","yellow","dark"];
     var last_color = 0;
 
-    function move(player, left, up) {
-      var width = $('#screen').css('width');
-      var height = $('#screen').css('height');
-
-      //Turn width and height into numbers
-      width = 1 * (width.replace("px", ""));
-      height = 1 * (height.replace("px", ""));      
-
-      // console.log("width:" + width);
-      // console.log("height:" + height);
-
-      var x = $('#' + player).css('left');
-      var y = $('#' + player).css('top');
-
-      //turn x, y into number
-      y = 1 * (y.replace("px", ""));
-      x = 1 * (x.replace("px", ""));
-
-      // console.log(x);
-      // console.log(up);
-
-      //Protect from going off the top and left
-      up   = ((y-up) <= 10) ? 0 : up;
-      left = ((x+left) <= 10) ? 0 : left;
+    var game_players = {};
+    var h = window.innerHeight;
+    var w = window.innerWidth;
+    var X_VELOCITY = 1;
+    var Y_VELOCITY = 1;
 
 
-      //Protect from going off the bottom and right
-      if( (y+up) >= (height-50) && (up < 0) ){
-        up = 0;
-      }
+    var cg = document.getElementById("screen");
+    cg.width = window.innerWidth;
+    cg.height = window.innerHeight;
+    var context;
 
-      if((x-left) >= (width-50) && (left > 0)){
-        left = 0;
-      }
-    
+    if(cg.getContext){
+        context = cg.getContext("2d");
 
-      //Replaced animate with css, got some perfomance improvement.
-      $('#' + player).css('left', "+="+left);
-      $('#' + player).css('top', "-="+up);
-      // $("#"+player).animate({"left": "+="+left, "top": "-="+up }, 1, function() {
-        
-      // });
-      
+        gameTick(1000/60, context, game_players);
 
     }
 
-    function createPlayer(cb) {
+    function move(player_id, left, up) {
+
+      // console.log("LEFT"+left);
+      // console.log("UP"+up);
+
+      var player = game_players[player_id];
+      if(player){
+        game_players[player_id].moveRight(left);
+        game_players[player_id].moveUp(up);
+      }
+
+    }
+
+
+
+    function createPlayer(id, cb) {
       var color = nextColor();
       var top   = Math.floor(Math.random() * 90);
       var left  = Math.floor(Math.random() * 90);
-      $('#screen').append('<div id="'+(++last_player_num)+'" class="player '+color+'" style="top:'+top+'%;left:'+left+'%;"></div>');
-      players.push(last_player_num);
+
+      var new_player = newPixelObject(context, color);
+      new_player.pos.x = top;
+      new_player.pos.y = left;
+      new_player.id = id;
+
+      game_players[id] = new_player;
+
+      // players.push(last_player_num); //still needed?
       cb(last_player_num);
     }
 
-    function deletePlayer(num) {
-      $('#'+num).remove();
-      players.splice(players.indexOf(num), 1);
+
+    function deletePlayer(id) {
+      // $('#'+num).remove();
+      // players.splice(players.indexOf(num), 1);
+      delete game_players[id];
     }
+
+
 
     function nextColor() {
       return colors[(last_color++) % colors.length];
@@ -125,7 +127,7 @@
 
     socket.on("player_joined_game", function(data) {
       console.log("Socket id:" + data.socket_id);
-      createPlayer(function(player_num) {
+      createPlayer(data.socket_id, function(player_num) {
         socket.emit("assign_number", { number: player_num, socket_id: data.socket_id });
       });
     });
@@ -137,10 +139,12 @@
 
     socket.on("disconnect", function(data) {
       deletePlayer(data.number);
+
     });
 
     socket.on('player_disconnected', function(data) {
         console.log(data.type + " disconnected...");
+        console.log(data);
         if(data.type == "controller") {
           deletePlayer(data.number);
         }

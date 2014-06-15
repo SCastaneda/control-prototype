@@ -28,9 +28,9 @@ function disconnect(socket) {
     rooms.forEach(function(room) {
         room.players.forEach(function(player, i) {
             if(player.socket == socket) {
-                var player_num = player.number;
+                var player_id = player.socket.id;
                 room.players.splice(i, 1);
-                broadcastDisconnectToRoom(room, "controller", player_num);
+                broadcastDisconnectToRoom(room, "controller", player_id);
             }
         });
         room.screens.forEach(function(ascreen, i) {
@@ -94,7 +94,7 @@ function sendMove(socket, data) {
     findScreensAndPlayerByController(socket, function(screens, player) {
         if(screens && player.active) {
             screens.forEach(function(ascreen) {
-                ascreen.emit('move', { number: player.number, dx: data.dx, dy: data.dy });
+                ascreen.emit('move', { number: player.socket.id, dx: data.dx, dy: data.dy });
             });
         } else {
             if(!screens) {
