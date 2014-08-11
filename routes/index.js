@@ -8,7 +8,7 @@ exports.index = function(req, res){
 };
 
 exports.show = function(req, res){
-  res.render('screen', { room: req.params.room });
+  res.render('quintus_screen', { room: req.params.room });
 };
 
 exports.control = function(req, res){
